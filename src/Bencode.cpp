@@ -9,29 +9,29 @@ using namespace std;
 // i100e
 // i-25e
 
-int parseInteger(string data, int &index) {
+BencodeValue parseInteger(string data, int &index) {
 
-    // Integer must start with 'i'
     if (data[index] != 'i') {
         throw runtime_error("Expected integer");
     }
 
-    // Move past 'i'
     index++;
 
     string number = "";
 
-    // Store all characters until 'e'
     while (data[index] != 'e') {
         number += data[index];
         index++;
     }
 
-    // Move past 'e'
     index++;
 
-    // Convert string to integer
-    return stoi(number);
+    BencodeValue value;
+
+    value.type = INTEGER;
+    value.intValue = stoi(number);
+
+    return value;
 }
 
 
@@ -40,31 +40,85 @@ int parseInteger(string data, int &index) {
 // 4:name
 // 11:hello world
 
-string parseString(string data, int &index) {
+BencodeValue parseString(string data, int &index) {
 
-    // Store the length of the string
     string lengthString = "";
 
-    // Read the length until ':'
     while (data[index] != ':') {
         lengthString += data[index];
         index++;
     }
 
-    // Convert length from string to integer
     int length = stoi(lengthString);
 
-    // Move past ':'
     index++;
 
-    // Store the actual string
     string result = "";
 
-    // Read exactly 'length' characters
     for (int i = 0; i < length; i++) {
         result += data[index];
         index++;
     }
 
-    return result;
+    BencodeValue value;
+
+    value.type = STRING;
+    value.stringValue = result;
+
+    return value;
+}
+
+
+// Decide what type of Bencode data we are looking at
+
+BencodeValue parseAny(string data, int &index) {
+
+    if (data[index] == 'i') {
+        return parseInteger(data, index);
+    }
+
+    if (data[index] == 'l') {
+        return parseList(data, index);
+    }
+
+    if (data[index] >= '0' && data[index] <= '9') {
+        return parseString(data, index);
+    }
+
+    throw runtime_error("Unknown Bencode type");
+}
+
+
+// Bencode list format:
+// l5:helloi42ee
+//
+// Means:
+// ["hello", 42]
+
+BencodeValue parseList(string data, int &index) {
+
+    // Current character should be 'l'
+    if (data[index] != 'l') {
+        throw runtime_error("Expected list");
+    }
+
+    // Move past 'l'
+    index++;
+
+    BencodeValue value;
+
+    value.type = LIST;
+
+    // Keep parsing until we reach 'e'
+    while (data[index] != 'e') {
+
+        BencodeValue element = parseAny(data, index);
+
+        value.listValue.push_back(element);
+    }
+
+    // Move past 'e'
+    index++;
+
+    return value;
 }

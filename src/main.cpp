@@ -5,22 +5,24 @@ using namespace std;
 
 int main() {
 
-    // Test integer
-    string integerData = "i12345e";
-    int index1 = 0;
+    string data = "ll5:helloei42ee";
 
-    int number = parseInteger(integerData, index1);
+    int index = 0;
 
-    cout << "Integer: " << number << endl;
+    BencodeValue result = parseAny(data, index);
+
+    cout << "List parsed successfully!" << endl;
+
+    cout << "First element: "
+         << result.listValue[0].stringValue << endl;
+
+    cout << "Second element: "
+         << result.listValue[1].intValue << endl;
 
 
-    // Test string
-    string stringData = "11:hello world";
-    int index2 = 0;
-
-    string result = parseString(stringData, index2);
-
-    cout << "String: " << result << endl;
+    if (result.type == LIST) {
+    cout << "Correctly identified as a list!" << endl;
+     }     
 
     return 0;
 }
