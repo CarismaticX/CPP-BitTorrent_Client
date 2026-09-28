@@ -84,6 +84,9 @@ BencodeValue parseAny(string data, int &index) {
     if (data[index] >= '0' && data[index] <= '9') {
         return parseString(data, index);
     }
+    if (data[index] == 'd') {
+    return parseDictionary(data, index);
+    }
 
     throw runtime_error("Unknown Bencode type");
 }
@@ -115,6 +118,41 @@ BencodeValue parseList(string data, int &index) {
         BencodeValue element = parseAny(data, index);
 
         value.listValue.push_back(element);
+    }
+
+    // Move past 'e'
+    index++;
+
+    return value;
+}
+
+
+
+BencodeValue parseDictionary(string data, int &index) {
+
+    // Current character should be 'd'
+    if (data[index] != 'd') {
+        throw runtime_error("Expected dictionary");
+    }
+
+    // Move past 'd'
+    index++;
+
+    BencodeValue value;
+
+    value.type = DICTIONARY;
+
+    // Keep reading key-value pairs until 'e'
+    while (data[index] != 'e') {
+
+        // Dictionary key
+        BencodeValue key = parseString(data, index);
+
+        // Dictionary value
+        BencodeValue dictionaryValue = parseAny(data, index);
+
+        // Store key -> value
+        value.dictionaryValue[key.stringValue] = dictionaryValue;
     }
 
     // Move past 'e'
