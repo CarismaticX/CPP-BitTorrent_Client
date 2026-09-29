@@ -28,3 +28,6 @@ BencodeValue parseString(string data, int &index);
 BencodeValue parseAny(string data, int &index);
 BencodeValue parseList(string data, int &index);
 BencodeValue parseDictionary(string data, int &index);
+
+string bencode(const BencodeValue& value);
+

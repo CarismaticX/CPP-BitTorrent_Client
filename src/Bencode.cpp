@@ -160,3 +160,52 @@ BencodeValue parseDictionary(string data, int &index) {
 
     return value;
 }
+
+
+string bencode(const BencodeValue& value) {
+
+    if (value.type == INTEGER) {
+
+        return "i" + to_string(value.intValue) + "e";
+    }
+
+    if (value.type == STRING) {
+
+        return to_string(value.stringValue.size())
+             + ":"
+             + value.stringValue;
+    }
+
+    if (value.type == LIST) {
+
+        string result = "l";
+
+        for (auto item : value.listValue) {
+            result += bencode(item);
+        }
+
+        result += "e";
+
+        return result;
+    }
+
+    if (value.type == DICTIONARY) {
+
+        string result = "d";
+
+        for (auto entry : value.dictionaryValue) {
+
+            result += to_string(entry.first.size());
+            result += ":";
+            result += entry.first;
+
+            result += bencode(entry.second);
+        }
+
+        result += "e";
+
+        return result;
+    }
+
+    throw runtime_error("Unknown Bencode type");
+}
